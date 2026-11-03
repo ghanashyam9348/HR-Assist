@@ -133,14 +133,3 @@ This prompt orchestrates onboarding tasks by calling the tools above.
 Reference UI screenshot:
 
 <img src="Resources/image.jpg" alt="Claude desktop prompt with fields" style="width:auto;height:300px;padding-left:30px">
-
-## GitHub Upload Checklist
-
-Before pushing, confirm:
-
-- `.env` is not committed.
-- `sample.env` is committed.
-- Virtual environment folders are excluded.
-- `uv.lock` is included only if you want reproducible installs.
-
-All rights reserved @Codebasics Inc and LearnerX India Private Ltd.
