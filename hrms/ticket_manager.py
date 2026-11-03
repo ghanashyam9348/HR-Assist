@@ -1,12 +1,19 @@
-from typing import List, Dict, Optional
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Dict, List, Optional
 from .schemas import TicketCreate, TicketStatusUpdate
+from .database import HRDatabase
 
 
 class TicketManager:
-    def __init__(self):
-        self.tickets: List[Dict[str, str]] = []
-        self._next_id: int = 1
+    def __init__(self, database: Optional[HRDatabase] = None):
+        self.database = database or HRDatabase()
+        self.tickets: List[Dict[str, str]] = self.database.load_tickets()
+        numeric_ids = []
+        for ticket in self.tickets:
+            ticket_number = ticket["ticket_id"].removeprefix("T")
+            if ticket_number.isdigit():
+                numeric_ids.append(int(ticket_number))
+        self._next_id = max(numeric_ids, default=0) + 1
 
     def create_ticket(self, req: TicketCreate) -> str:
         ticket_id = f"T{self._next_id:04d}"
@@ -16,10 +23,11 @@ class TicketManager:
             "item": req.item,
             "reason": req.reason,
             "status": "Open",
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
         }
         self.tickets.append(ticket)
+        self.database.save_tickets(self.tickets)
         self._next_id += 1
         return f"Ticket {ticket_id} created for {req.emp_id}."
 
@@ -27,7 +35,8 @@ class TicketManager:
         for t in self.tickets:
             if t["ticket_id"] == ticket_id:
                 t["status"] = req.status
-                t["updated_at"] = datetime.utcnow().isoformat()
+                t["updated_at"] = datetime.now(timezone.utc).isoformat()
+                self.database.save_tickets(self.tickets)
                 return f"Ticket {ticket_id} status updated to {req.status}."
         raise ValueError(f"Ticket '{ticket_id}' not found.")
 

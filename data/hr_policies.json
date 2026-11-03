@@ -1,0 +1,86 @@
+[
+  {
+    "doc_id": "SYN-LEAVE-001",
+    "title": "Annual Leave Requests",
+    "category": "leave",
+    "effective_date": "2026-01-01",
+    "text": "Full-time employees receive an annual leave balance that is shown in the HR system. Submit leave dates through the HR system before making non-refundable travel plans. A request is pending until the manager approves it. The system should be checked for the current balance before applying. This synthetic example does not define a real entitlement or approval deadline."
+  },
+  {
+    "doc_id": "SYN-LEAVE-002",
+    "title": "Sick Leave Notification",
+    "category": "leave",
+    "effective_date": "2026-01-01",
+    "text": "If illness prevents an employee from working, notify the manager as soon as reasonably possible and record the absence through the HR system. Do not include medical diagnosis details in a general leave request. Questions about documentation or accommodation should be directed to the HR team. This synthetic example is not a substitute for local law or an actual company policy."
+  },
+  {
+    "doc_id": "SYN-LEAVE-003",
+    "title": "Leave Request Changes",
+    "category": "leave",
+    "effective_date": "2026-01-01",
+    "text": "To change or cancel an approved leave request, contact the manager and update the request in the HR system. The manager should confirm the change in the system so the employee's leave balance and team calendar remain accurate. For an urgent absence, notify the manager directly as well as recording it in the system."
+  },
+  {
+    "doc_id": "SYN-ONBOARD-001",
+    "title": "New Employee Onboarding",
+    "category": "onboarding",
+    "effective_date": "2026-01-01",
+    "text": "A manager starts onboarding by confirming the new employee's name, work email, start date, and reporting manager with HR. Equipment requests should be submitted as separate IT or facilities tickets so each request can be tracked. Share account setup instructions through an approved secure channel; never send passwords in plain text email."
+  },
+  {
+    "doc_id": "SYN-ONBOARD-002",
+    "title": "Employee Equipment Requests",
+    "category": "equipment",
+    "effective_date": "2026-01-01",
+    "text": "Employees and managers request work equipment by creating a ticket that identifies the requested item and business reason. Keep one item or closely related set of items per ticket. The requester can use the ticket system to check whether a request is open, in progress, or closed. A ticket is not a guarantee of purchase or delivery by a particular date."
+  },
+  {
+    "doc_id": "SYN-SECURITY-001",
+    "title": "Protecting Account Credentials",
+    "category": "security",
+    "effective_date": "2026-01-01",
+    "text": "Use the approved identity and password-management tools to create and store credentials. Never ask an employee to send a password by email or chat, and never include passwords in onboarding tickets. If credentials may have been exposed, contact the IT or security team promptly and follow their instructions."
+  },
+  {
+    "doc_id": "SYN-MEETING-001",
+    "title": "Scheduling Internal Meetings",
+    "category": "meetings",
+    "effective_date": "2026-01-01",
+    "text": "When scheduling an internal meeting, include a clear topic, date, time, and required participants. Check attendee availability before sending an invitation and include an agenda when preparation is needed. If plans change, notify participants and cancel or update the calendar invitation."
+  },
+  {
+    "doc_id": "SYN-MEETING-002",
+    "title": "Introductory One-to-One Meetings",
+    "category": "meetings",
+    "effective_date": "2026-01-01",
+    "text": "Managers should arrange an introductory one-to-one with a new employee during onboarding. Suggested topics include team responsibilities, communication preferences, first-week priorities, and where to find internal resources. The meeting is intended for orientation and should not be used to share another employee's confidential information."
+  },
+  {
+    "doc_id": "SYN-EXPENSE-001",
+    "title": "Business Expense Submissions",
+    "category": "expenses",
+    "effective_date": "2026-01-01",
+    "text": "Submit business expenses through the approved expense process with the date, amount, business purpose, and required receipt. Ask the finance team about eligibility or missing documentation before assuming an expense will be reimbursed. This synthetic dataset does not specify spending limits, deadlines, or reimbursement guarantees."
+  },
+  {
+    "doc_id": "SYN-REMOTE-001",
+    "title": "Remote Work Equipment",
+    "category": "equipment",
+    "effective_date": "2026-01-01",
+    "text": "For equipment needed to work remotely, create an IT or facilities ticket that describes the item and why it is needed for work. Do not include personal account passwords or sensitive personal information in the ticket. Contact the manager or HR team for questions about work-location arrangements."
+  },
+  {
+    "doc_id": "SYN-HR-001",
+    "title": "HR Policy Questions",
+    "category": "hr",
+    "effective_date": "2026-01-01",
+    "text": "For questions about an employee's individual situation, applicable law, accommodations, benefits eligibility, or a policy not covered by this synthetic example, contact the HR team directly. General policy search results are informational only and do not replace an HR determination."
+  },
+  {
+    "doc_id": "SYN-TICKET-001",
+    "title": "Tracking HR and IT Tickets",
+    "category": "tickets",
+    "effective_date": "2026-01-01",
+    "text": "Use the ticket system to report a request, provide a concise reason, and track its status. Add relevant details to the existing ticket rather than creating duplicate requests. A ticket status describes workflow progress and should not be interpreted as a final policy decision or a promised completion time."
+  }
+]

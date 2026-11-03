@@ -1,12 +1,16 @@
 from typing import List, Dict, Optional
 from difflib import get_close_matches
 from .schemas import EmployeeCreate
+from .database import HRDatabase
 
 
 class EmployeeManager:
-    def __init__(self):
-        self.employees: Dict[str, Dict[str, str]] = {}
-        self.manager_map: Dict[str, Optional[str]] = {}
+    def __init__(self, database: Optional[HRDatabase] = None):
+        self.database = database or HRDatabase()
+        self.employees: Dict[str, Dict[str, Optional[str]]] = self.database.load_employees()
+        self.manager_map: Dict[str, Optional[str]] = {
+            emp_id: employee["manager_id"] for emp_id, employee in self.employees.items()
+        }
 
     def get_next_emp_id(self) -> str:
         """
@@ -29,6 +33,7 @@ class EmployeeManager:
             raise ValueError(f"Manager ID '{manager_id}' does not exist.")
         self.employees[emp.emp_id] = emp.model_dump()
         self.manager_map[emp.emp_id] = manager_id
+        self.database.save_employee(self.employees[emp.emp_id])
 
     def get_manager(self, emp_id: str) -> str:
         """
@@ -50,6 +55,22 @@ class EmployeeManager:
         if emp_id not in self.employees:
             raise ValueError(f"Employee ID '{emp_id}' not found.")
         return self.employees[emp_id]
+
+    def list_employees(self) -> List[Dict[str, Optional[str]]]:
+        return [self.employees[emp_id] for emp_id in sorted(self.employees)]
+
+    def search_employees(self, query: str) -> List[Dict[str, Optional[str]]]:
+        if not isinstance(query, str) or not query.strip():
+            raise ValueError("Search query must not be empty.")
+
+        normalized_query = query.strip().casefold()
+        return [
+            employee
+            for employee in self.list_employees()
+            if normalized_query in employee["emp_id"].casefold()
+            or normalized_query in employee["name"].casefold()
+            or normalized_query in (employee.get("email") or "").casefold()
+        ]
 
     def get_direct_reports(self, manager_id: str) -> List[str]:
         if manager_id not in self.employees:

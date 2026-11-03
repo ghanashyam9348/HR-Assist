@@ -11,3 +11,9 @@ wheels/
 .venv
 uv.lock
 .env
+data/hr_assist.sqlite3
+data/hr_assist.sqlite3-shm
+data/hr_assist.sqlite3-wal
+data/.policy_vectors.sqlite3
+data/.policy_vectors.sqlite3-shm
+data/.policy_vectors.sqlite3-wal

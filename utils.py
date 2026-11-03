@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 from collections import defaultdict
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 import random
 from hrms import *
 
@@ -17,6 +17,14 @@ def seed_services(employee_manager, leave_manager, meeting_manager, ticket_manag
     Returns:
         None - services are modified in-place
     """
+
+    if employee_manager.employees:
+        return {
+            "employees": len(employee_manager.employees),
+            "leave_records": sum(len(data["history"]) for data in leave_manager.employee_leaves.values()),
+            "meetings": sum(len(meetings) for meetings in meeting_manager.meetings.values()),
+            "tickets": len(ticket_manager.tickets),
+        }
 
     employees_data = [
         # Leadership
@@ -123,15 +131,22 @@ def seed_services(employee_manager, leave_manager, meeting_manager, ticket_manag
         employee = random.choice(employees_data)
 
         ticket = {
-            "ticket_id": str(ticket_manager._next_id),
+            "ticket_id": f"T{ticket_manager._next_id:04d}",
             "emp_id": employee["emp_id"],
             "item": random.choice(ticket_items),
             "reason": random.choice(ticket_reasons),
-            "status": random.choice(["Open", "In Progress", "Closed"])
+            "status": random.choice(["Open", "In Progress", "Closed"]),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
         }
 
         ticket_manager.tickets.append(ticket)
         ticket_manager._next_id += 1
+
+    employee_manager.database.save_employees(employee_manager.employees)
+    leave_manager.database.save_leave(leave_manager.employee_leaves)
+    meeting_manager.database.save_meetings(meeting_manager.meetings)
+    ticket_manager.database.save_tickets(ticket_manager.tickets)
 
     return {
         "employees": len(employee_manager.employees),

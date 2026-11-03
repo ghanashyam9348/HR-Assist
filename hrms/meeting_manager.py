@@ -1,11 +1,16 @@
 from typing import List, Dict
 from collections import defaultdict
 from datetime import datetime
+from typing import Optional
 from .schemas import MeetingCreate, MeetingCancelRequest
+from .database import HRDatabase
 
 class MeetingManager:
-    def __init__(self):
-        self.meetings: Dict[str, List[Dict[str, str]]] = defaultdict(list)
+    def __init__(self, database: Optional[HRDatabase] = None):
+        self.database = database or HRDatabase()
+        self.meetings: Dict[str, List[Dict[str, str]]] = self.database.load_meetings()
+        if not isinstance(self.meetings, defaultdict):
+            self.meetings = defaultdict(list, self.meetings)
 
     def schedule_meeting(self, req: MeetingCreate) -> str:
         dt_str = req.meeting_dt.isoformat()
@@ -17,6 +22,7 @@ class MeetingManager:
         if any(m["date"] == dt_str for m in self.meetings[emp_id]):
             raise ValueError(f"Conflict: {emp_id} already has a meeting at {dt_str}.")
         self.meetings[emp_id].append({"date": dt_str, "topic": req.topic})
+        self.database.save_meetings(self.meetings)
         return f"Meeting scheduled for {emp_id} on {dt_str} about '{req.topic}'."
 
     def get_meetings(self, employee_id: str) -> List[Dict[str, str]]:
@@ -31,4 +37,5 @@ class MeetingManager:
         )]
         if len(self.meetings[emp_id]) == len(original):
             raise ValueError("No matching meeting to cancel.")
+        self.database.save_meetings(self.meetings)
         return f"Canceled meeting for {emp_id} on {dt_str}{f' about {req.topic}' if req.topic else ''}."

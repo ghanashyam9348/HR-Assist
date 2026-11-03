@@ -2,6 +2,8 @@ from emails import EmailSender
 from hrms import *
 from typing import List, Dict, Optional
 from mcp.server.fastmcp import FastMCP
+from datetime import date
+import json
 import hmac
 import os
 import uvicorn
@@ -11,11 +13,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from utils import seed_services
+from hrms.database import HRDatabase
+from hrms.directory import build_employee_directory
+from hrms.policy_rag import OpenAIPolicyRAG
+from hrms.reports import build_hr_overview
 
-employee_manager = EmployeeManager()
-meeting_manager = MeetingManager()
-leave_manager = LeaveManager()
-ticket_manager = TicketManager()
+hr_database = HRDatabase()
+employee_manager = EmployeeManager(hr_database)
+meeting_manager = MeetingManager(hr_database)
+leave_manager = LeaveManager(hr_database)
+ticket_manager = TicketManager(hr_database)
+policy_rag = OpenAIPolicyRAG()
 
 seed_services(employee_manager, leave_manager, meeting_manager, ticket_manager)
 
@@ -28,6 +36,28 @@ emailer = EmailSender(
 )
 
 mcp = FastMCP("hr-assist")
+
+@mcp.tool()
+def search_hr_policies(question: str, top_k: int = 3, category: Optional[str] = None) -> str:
+    """Retrieve semantically relevant synthetic policy passages and citations."""
+    results = policy_rag.search(question, top_k=top_k, category=category)
+    return json.dumps({
+        "question": question,
+        "results": results,
+        "message": (
+            "These are synthetic demonstrations, not authoritative HR guidance."
+            if results else
+            "No matching policy passages were found. Do not infer a policy answer; ask HR."
+        ),
+    }, ensure_ascii=False)
+
+@mcp.tool()
+def answer_hr_policy(question: str, top_k: int = 3, category: Optional[str] = None) -> str:
+    """Answer an HR policy question from retrieved synthetic policy passages."""
+    return json.dumps(
+        policy_rag.answer(question, top_k=top_k, category=category),
+        ensure_ascii=False,
+    )
 
 class BearerTokenMiddleware:
     def __init__(self, app, token: str):
@@ -98,6 +128,49 @@ def get_employee_details(name: str) -> Dict[str, str]:
     emp_id = matches[0]
     emp_details = employee_manager.get_employee_details(emp_id)
     return emp_details
+
+@mcp.tool()
+def list_employees(include_details: bool = False) -> Dict[str, object]:
+    """List employees with IDs, names, email, and managers; optionally include HR records."""
+    employees = build_employee_directory(
+        employee_manager,
+        leave_manager,
+        meeting_manager,
+        ticket_manager,
+        include_details=include_details,
+    )
+    return {"count": len(employees), "employees": employees}
+
+@mcp.tool()
+def search_employees(query: str) -> Dict[str, object]:
+    """Search employees by ID, name, or email and include their manager."""
+    matches = employee_manager.search_employees(query)
+    employees = []
+    for employee in matches:
+        manager_id = employee.get("manager_id")
+        manager = employee_manager.employees.get(manager_id) if manager_id else None
+        employees.append({
+            **employee,
+            "manager": (
+                {
+                    "emp_id": manager_id,
+                    "name": manager["name"],
+                    "email": manager.get("email"),
+                }
+                if manager else None
+            ),
+        })
+    return {"count": len(employees), "employees": employees}
+
+@mcp.tool()
+def get_hr_overview() -> Dict[str, object]:
+    """Summarize headcount, managers, leave, ticket statuses, and upcoming meetings."""
+    return build_hr_overview(
+        employee_manager,
+        leave_manager,
+        meeting_manager,
+        ticket_manager,
+    )
 
 @mcp.tool()
 def send_email(to_emails: List[str], subject: str, body: str, html: bool = False) -> None:
@@ -212,6 +285,20 @@ def get_leave_history(emp_id: str) -> str:
     :return: Leave history message
     """
     return leave_manager.get_leave_history(emp_id)
+
+@mcp.tool()
+def edit_leave_history(
+    emp_id: str,
+    history_id: int,
+    new_leave_date: Optional[str] = None,
+) -> str:
+    """Correct a leave date, or remove that leave day and restore one balance day."""
+    parsed_leave_date = date.fromisoformat(new_leave_date) if new_leave_date else None
+    return leave_manager.edit_leave_history(
+        emp_id,
+        history_id,
+        new_leave_date=parsed_leave_date,
+    )
 
 
 @mcp.prompt("onboard_new_employee")
