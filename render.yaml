@@ -9,4 +9,4 @@ services:
       - key: MCP_TRANSPORT
         value: streamable-http
       - key: MCP_AUTH_TOKEN
-        sync: false
+        generateValue: true

@@ -93,8 +93,8 @@ The included `render.yaml` configures this project as a remote MCP server using
 Streamable HTTP. To deploy:
 
 1. Push this repository to GitHub and create a Blueprint in Render using the repository.
-2. Set `MCP_AUTH_TOKEN` to a private, randomly generated token in Render's environment settings.
-   Do not commit the token or put it in `render.yaml`.
+2. Render generates `MCP_AUTH_TOKEN` for the service. Copy it from the service's environment
+   settings into your MCP client's secret configuration; do not commit or share the token.
 3. If you want email sending, also set `CB_EMAIL` and `CB_EMAIL_PWD` in Render's environment settings.
 4. Connect your MCP client to `https://<your-render-service>.onrender.com/mcp` and configure
    the request header `Authorization: Bearer <your-MCP_AUTH_TOKEN>`.
