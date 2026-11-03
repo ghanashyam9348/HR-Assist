@@ -87,6 +87,22 @@ uv run server.py
 
 The server uses `stdio` transport and is intended to be launched by an MCP client.
 
+## Cloud Deployment on Render
+
+The included `render.yaml` configures this project as a remote MCP server using
+Streamable HTTP. To deploy:
+
+1. Push this repository to GitHub and create a Blueprint in Render using the repository.
+2. Set `MCP_AUTH_TOKEN` to a private, randomly generated token in Render's environment settings.
+   Do not commit the token or put it in `render.yaml`.
+3. If you want email sending, also set `CB_EMAIL` and `CB_EMAIL_PWD` in Render's environment settings.
+4. Connect your MCP client to `https://<your-render-service>.onrender.com/mcp` and configure
+   the request header `Authorization: Bearer <your-MCP_AUTH_TOKEN>`.
+
+The token protects all HTTP requests to the MCP service. The included HR data is seeded
+in memory, so changes are demo-only and reset when the service restarts or redeploys.
+This project does not include a web user interface or persistent storage.
+
 ## Available MCP Tools
 
 - `add_employee`

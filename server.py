@@ -2,12 +2,14 @@ from emails import EmailSender
 from hrms import *
 from typing import List, Dict, Optional
 from mcp.server.fastmcp import FastMCP
+import hmac
+import os
+import uvicorn
 
 # load the env
 from dotenv import load_dotenv
 load_dotenv()
 
-import os
 from utils import seed_services
 
 employee_manager = EmployeeManager()
@@ -26,6 +28,43 @@ emailer = EmailSender(
 )
 
 mcp = FastMCP("hr-assist")
+
+class BearerTokenMiddleware:
+    def __init__(self, app, token: str):
+        self.app = app
+        self.token = token.encode("utf-8")
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        authorization = next(
+            (value for name, value in scope.get("headers", []) if name.lower() == b"authorization"),
+            b"",
+        )
+        scheme, separator, supplied_token = authorization.partition(b" ")
+        if (
+            not separator
+            or scheme.lower() != b"bearer"
+            or not hmac.compare_digest(supplied_token, self.token)
+        ):
+            body = b'{"error":"Unauthorized"}'
+            await send(
+                {
+                    "type": "http.response.start",
+                    "status": 401,
+                    "headers": [
+                        (b"content-type", b"application/json"),
+                        (b"content-length", str(len(body)).encode("ascii")),
+                        (b"www-authenticate", b"Bearer"),
+                    ],
+                }
+            )
+            await send({"type": "http.response.body", "body": body})
+            return
+
+        await self.app(scope, receive, send)
 
 @mcp.tool()
 def add_employee(emp_name:str, manager_id:str, email:str) -> str:
@@ -191,4 +230,15 @@ def onboard_new_employee(employee_name: str, manager_name: str):
 
 
 if __name__ == "__main__":
-    mcp.run(transport="stdio")
+    transport = os.getenv("MCP_TRANSPORT", "stdio")
+    if transport == "stdio":
+        mcp.run(transport="stdio")
+    elif transport == "streamable-http":
+        auth_token = os.getenv("MCP_AUTH_TOKEN")
+        if not auth_token:
+            raise RuntimeError("MCP_AUTH_TOKEN is required for streamable HTTP transport.")
+
+        app = BearerTokenMiddleware(mcp.streamable_http_app(), auth_token)
+        uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "8000")))
+    else:
+        raise ValueError(f"Unsupported MCP_TRANSPORT: {transport}")

@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: hr-assist-mcp
+    runtime: python
+    buildCommand: pip install .
+    startCommand: python server.py
+    envVars:
+      - key: MCP_TRANSPORT
+        value: streamable-http
+      - key: MCP_AUTH_TOKEN
+        sync: false
