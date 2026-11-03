@@ -101,7 +101,8 @@ Streamable HTTP. To deploy:
 
 The token protects all HTTP requests to the MCP service. The included HR data is seeded
 in memory, so changes are demo-only and reset when the service restarts or redeploys.
-This project does not include a web user interface or persistent storage.
+This project does not include a web user interface or persistent storage. The Render free
+instance may spin down when idle, delaying the first connection after inactivity.
 
 ## Available MCP Tools
 

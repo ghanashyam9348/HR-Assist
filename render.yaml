@@ -2,6 +2,7 @@ services:
   - type: web
     name: hr-assist-mcp
     runtime: python
+    plan: free
     buildCommand: pip install .
     startCommand: python server.py
     envVars:
